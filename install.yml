@@ -1,0 +1,42 @@
+---
+- name: Install Kubernetes and its Dependencies
+  hosts: all
+  remote_user: benjamin
+  become: yes
+  tasks:
+  # Update all repos before running.
+  - name: Run dnf update
+    ansible.builtin.dnf:
+      name: "*"
+      state: latest
+
+  - name: Using dnf update/install dnf-plugins-core
+    ansible.builtin.dnf:
+      name:
+        - dnf-plugins-core
+      state: latest
+
+  - name: Using dnf update/install docker
+    ansible.builtin.dnf:
+      name:
+        - docker-ce 
+        - docker-ce-cli 
+        - containerd.io 
+        - docker-buildx-plugin 
+        - docker-compose-plugin
+      state: latest
+
+  # This is needed to get kubernetes repo details
+  - name: Execute repo addition script
+    ansible.builtin.script: 
+      cmd: add_repo.sh
+    
+  - name: Install Kubernetes
+    ansible.builtin.yum:
+      name:
+        - kubelet
+        - kubeadm
+        - kubectl
+      state: latest
+      disable_excludes: kubernetes
+...
